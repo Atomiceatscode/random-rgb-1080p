@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random RGB 1920x1080</title>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        canvas {
+            width: 100%;
+            height: auto;
+            max-height: 100%;
+            image-rendering: pixelated;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.6);
+        }
+
+        .overlay {
+            position: fixed;
+            top: 10px;
+            left: 10px;
+            color: #fff;
+            font-family: system-ui, sans-serif;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 6px 10px;
+            border-radius: 6px;
+        }
+
+        .controls {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            color: #fff;
+            font-family: system-ui, sans-serif;
+            font-size: 14px;
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 12px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .controls input[type="range"] {
+            width: 160px;
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" id="status">1920x1080 random RGB • updates every 1s • image ratio: 3%</div>
+    <div class="controls">
+        <label for="ratio">Image ratio</label>
+        <input id="ratio" type="range" min="0" max="100" value="3" />
+        <span id="ratio-value">3%</span>
+    </div>
+    <canvas id="canvas" width="1920" height="1080"></canvas>
+
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        const width = canvas.width;
+        const height = canvas.height;
+        const totalPixels = width * height;
+
+        const imageData = ctx.createImageData(width, height);
+        const data = imageData.data;
+
+        function fillRandomPixels() {
+            for (let i = 0; i < totalPixels; i++) {
+                const idx = i * 4;
+                data[idx] = Math.floor(Math.random() * 256);
+                data[idx + 1] = Math.floor(Math.random() * 256);
+                data[idx + 2] = Math.floor(Math.random() * 256);
+                data[idx + 3] = 255;
+            }
+        }
+
+        function drawProceduralImage() {
+            const type = Math.floor(Math.random() * 3);
+            ctx.clearRect(0, 0, width, height);
+
+            if (type === 0) {
+                const grad = ctx.createLinearGradient(0, 0, width, height);
+                grad.addColorStop(0, `rgb(${rand255()}, ${rand255()}, ${rand255()})`);
+                grad.addColorStop(1, `rgb(${rand255()}, ${rand255()}, ${rand255()})`);
+                ctx.fillStyle = grad;
+                ctx.fillRect(0, 0, width, height);
+            } else if (type === 1) {
+                const cell = 40 + Math.floor(Math.random() * 80);
+                for (let y = 0; y < height; y += cell) {
+                    for (let x = 0; x < width; x += cell) {
+                        ctx.fillStyle = `rgb(${rand255()}, ${rand255()}, ${rand255()})`;
+                        ctx.fillRect(x, y, cell, cell);
+                    }
+                }
+            } else {
+                ctx.fillStyle = `rgb(${rand255()}, ${rand255()}, ${rand255()})`;
+                ctx.fillRect(0, 0, width, height);
+                const count = 5 + Math.floor(Math.random() * 12);
+                for (let i = 0; i < count; i++) {
+                    ctx.fillStyle = `rgba(${rand255()}, ${rand255()}, ${rand255()}, 0.8)`;
+                    const radius = 50 + Math.random() * 300;
+                    const x = Math.random() * width;
+                    const y = Math.random() * height;
+                    ctx.beginPath();
+                    ctx.arc(x, y, radius, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+            }
+        }
+
+        function rand255() {
+            return Math.floor(Math.random() * 256);
+        }
+
+        const ratioInput = document.getElementById('ratio');
+        const ratioValue = document.getElementById('ratio-value');
+        const status = document.getElementById('status');
+
+        function getImageRatio() {
+            return Math.max(0, Math.min(100, parseInt(ratioInput.value, 10) || 0));
+        }
+
+        function updateRatioDisplay() {
+            const ratio = getImageRatio();
+            ratioValue.textContent = `${ratio}%`;
+            status.textContent = `1920x1080 random RGB • updates every 1s • image ratio: ${ratio}%`;
+        }
+
+        ratioInput.addEventListener('input', updateRatioDisplay);
+        updateRatioDisplay();
+
+        function tick() {
+            const chanceOfImage = getImageRatio() / 100;
+            if (Math.random() < chanceOfImage) {
+                drawProceduralImage();
+            } else {
+                fillRandomPixels();
+                ctx.putImageData(imageData, 0, 0);
+            }
+        }
+
+        tick();
+        setInterval(tick, 1000);
+    </script>
+</body>
+</html>
