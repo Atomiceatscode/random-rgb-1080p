@@ -37,33 +37,10 @@
             border-radius: 6px;
         }
 
-        .controls {
-            position: fixed;
-            top: 10px;
-            right: 10px;
-            color: #fff;
-            font-family: system-ui, sans-serif;
-            font-size: 14px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 12px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .controls input[type="range"] {
-            width: 160px;
-        }
     </style>
 </head>
 <body>
-    <div class="overlay" id="status">1920x1080 random RGB • updates every 1s • image ratio: 3%</div>
-    <div class="controls">
-        <label for="ratio">Image ratio</label>
-        <input id="ratio" type="range" min="0" max="100" value="3" />
-        <span id="ratio-value">3%</span>
-    </div>
+    <div class="overlay">1920x1080 random RGB • updates every 1s</div>
     <canvas id="canvas" width="1920" height="1080"></canvas>
 
     <script>
@@ -124,25 +101,8 @@
             return Math.floor(Math.random() * 256);
         }
 
-        const ratioInput = document.getElementById('ratio');
-        const ratioValue = document.getElementById('ratio-value');
-        const status = document.getElementById('status');
-
-        function getImageRatio() {
-            return Math.max(0, Math.min(100, parseInt(ratioInput.value, 10) || 0));
-        }
-
-        function updateRatioDisplay() {
-            const ratio = getImageRatio();
-            ratioValue.textContent = `${ratio}%`;
-            status.textContent = `1920x1080 random RGB • updates every 1s • image ratio: ${ratio}%`;
-        }
-
-        ratioInput.addEventListener('input', updateRatioDisplay);
-        updateRatioDisplay();
-
         function tick() {
-            const chanceOfImage = getImageRatio() / 100;
+            const chanceOfImage = 0.03;
             if (Math.random() < chanceOfImage) {
                 drawProceduralImage();
             } else {
